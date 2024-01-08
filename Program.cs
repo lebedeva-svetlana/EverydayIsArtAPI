@@ -83,6 +83,7 @@ builder.Services.AddSwaggerGen(oprions =>
     });
 });
 
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ITretyakovService, TretyakovService>();
 builder.Services.AddScoped<IVamService, VamService>();
 builder.Services.AddScoped<IAllService, AllService>();
