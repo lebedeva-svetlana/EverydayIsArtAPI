@@ -83,6 +83,16 @@ builder.Services.AddSwaggerGen(oprions =>
     });
 });
 
+var reactClient = "_reactClient";
+builder.Services.AddCors(options => options.AddPolicy(name: reactClient,
+    policy =>
+    {
+        policy.WithOrigins("https://lebedeva-svetlana.github.io")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    }
+));
+
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ITretyakovService, TretyakovService>();
 builder.Services.AddScoped<IVamService, VamService>();
@@ -101,6 +111,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(reactClient);
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
