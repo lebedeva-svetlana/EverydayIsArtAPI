@@ -3,12 +3,11 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// TODO: AddCors
-var anyCors = "_anyCors";
+var anyCors = "_reactClient";
 builder.Services.AddCors(options => options.AddPolicy(name: anyCors,
     policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("https://lebedeva-svetlana.github.io")
               .AllowAnyMethod()
               .AllowAnyHeader();
     }
