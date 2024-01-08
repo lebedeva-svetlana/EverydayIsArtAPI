@@ -10,8 +10,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var anyCors = "_reactClient";
-builder.Services.AddCors(options => options.AddPolicy(name: anyCors,
+builder.Services.AddDbContext<DatabaseContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseContext") ?? throw new InvalidOperationException("Connection string 'DatabaseContext' not found.")));
     policy =>
     {
         policy.WithOrigins("https://lebedeva-svetlana.github.io")
