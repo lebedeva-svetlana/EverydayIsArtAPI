@@ -4,6 +4,49 @@ EverydayIsArtAPI provides access to museum exhibits.
 
 ## Endpoints
 
+### User login
+
+`POST /user/login` returns JWT token.
+
+#### Example
+
+##### Request body
+
+```json
+{
+  "username": "ExampleName",
+  "password": "Example1234!"
+}
+```
+
+##### Response body
+
+```
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidGVzdCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3RAbWFpbC5jb20iLCJqdGkiOiJlOWRjMjQyNy1hM2Y2LTQyM2EtYjQ5MS0wMGJmNWE4ZTM2ODkiLCJleHAiOjE3MDQ3MjM2MzQsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjcwMTUiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMifQ.ix-fNxo5AfjlbZCRjCNGQq6kmaYpef2W3spbddcML2U"
+```
+
+### User registration
+
+`POST /user/register` creates new user and returns JWT token.
+
+#### Example
+
+##### Request body
+
+```json
+{
+  "username": "ExampleName",
+  "email": "example@mail.com",
+  "password": "Example1234!"
+}
+```
+
+##### Response body
+
+```
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidGVzdCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3RAbWFpbC5jb20iLCJqdGkiOiJlOWRjMjQyNy1hM2Y2LTQyM2EtYjQ5MS0wMGJmNWE4ZTM2ODkiLCJleHAiOjE3MDQ3MjM2MzQsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjcwMTUiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNzMifQ.ix-fNxo5AfjlbZCRjCNGQq6kmaYpef2W3spbddcML2U"
+```
+
 ### Random exhibit
 
 - `GET /random/all` returns exhibit from all organizations.
@@ -11,13 +54,13 @@ EverydayIsArtAPI provides access to museum exhibits.
 - `GET /random/vam` returns exhibit from Victoria and Albert Museum.
 - `GET /random/metmuseum` returns exhibit from the Metropolitan Museum of Art.
 
-### Example
+#### Example
 
-#### Request
+##### Request
 
 `*/random/metmuseum`
 
-#### Response
+##### Response body
 
 ```json
 {
