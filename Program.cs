@@ -94,16 +94,15 @@ builder.Services.AddCors(options => options.AddPolicy(name: reactClient,
 ));
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<ITretyakovService, TretyakovService>();
-builder.Services.AddScoped<IVamService, VamService>();
-builder.Services.AddScoped<IAllService, AllService>();
-builder.Services.AddScoped<IMetmuseumService, MetmuseumService>();
+
 builder.Services.AddScoped<IHTMLService, HTMLService>();
 
-var app = builder.Build();
+builder.Services.AddScoped<ITretyakovService, TretyakovService>();
+builder.Services.AddScoped<IVamService, VamService>();
+builder.Services.AddScoped<IMetmuseumService, MetmuseumService>();
+builder.Services.AddScoped<IAllService, AllService>();
 
-app.UseDefaultFiles();
-//app.UseStaticFiles();
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
@@ -116,10 +115,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-//app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapFallbackToFile("/index.html");
 
 app.Run();
