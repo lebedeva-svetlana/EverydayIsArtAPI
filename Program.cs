@@ -16,12 +16,25 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<DatabaseContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new TokenValidationParameters()
     {
-        policy.WithOrigins("https://lebedeva-svetlana.github.io")
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    }
-));
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:ValidAudience"],
+        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+    };
+});
 
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
