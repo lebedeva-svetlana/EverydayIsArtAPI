@@ -25,6 +25,8 @@ namespace EverydayIsArtAPI.Controllers
         ///     A JSON that contains <see cref="Art"/> with 200 status code or 500 status code.
         /// </returns>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Art>> GetArt()
         {
             try
