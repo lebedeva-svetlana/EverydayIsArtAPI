@@ -2,6 +2,9 @@
 
 namespace EverydayIsArtAPI.Data.VamObject
 {
+    /// <summary>
+    ///     An exhibit JSON of Victoria and Albert Museum API.
+    /// </summary>
     public class VamObject
     {
         [JsonPropertyName("meta")]

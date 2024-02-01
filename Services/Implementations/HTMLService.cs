@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace EverydayIsArtAPI.Services
 {
+    /// <inheritdoc cref="IHTMLService"/>
     public class HTMLService : IHTMLService
     {
         public string GetAttributeValue(object htmlDocument, string nodeSelector, string attributeName)

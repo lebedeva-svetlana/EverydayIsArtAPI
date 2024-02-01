@@ -4,6 +4,7 @@ using EverydayIsArtAPI.Models;
 
 namespace EverydayIsArtAPI.Services
 {
+    /// <inheritdoc cref="IVamService"/>
     public class VamService : IVamService
     {
         private readonly IConfiguration _config;

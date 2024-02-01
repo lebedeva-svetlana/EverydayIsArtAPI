@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EverydayIsArtAPI.Controllers
 {
+    /// <summary>
+    ///     A controller that provides access to authentication.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class UserController : ControllerBase
@@ -16,6 +19,15 @@ namespace EverydayIsArtAPI.Controllers
             _authenticationService = authenticationService;
         }
 
+        /// <summary>
+        ///     Authorizes a user.
+        /// </summary>
+        /// <param name="request">
+        ///     A login data.
+        /// </param>
+        /// <returns>
+        ///     An authentication token with 200 status code or error with status code 400 or 500.
+        /// </returns>
         [AllowAnonymous]
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
@@ -27,6 +39,15 @@ namespace EverydayIsArtAPI.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        ///     Registers a new user.
+        /// </summary>
+        /// <param name="request">
+        ///     A registration data.
+        /// </param>
+        /// <returns>
+        ///     An authentication token with 200 status code or error with status code 400 or 500.
+        /// </returns>
         [AllowAnonymous]
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]

@@ -2,6 +2,7 @@
 
 namespace EverydayIsArtAPI.Services
 {
+    /// <inheritdoc cref="IAllService"/>
     public class AllService : IAllService
     {
         private List<IArtService> _services = new();

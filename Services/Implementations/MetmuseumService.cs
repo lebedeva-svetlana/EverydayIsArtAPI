@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace EverydayIsArtAPI.Services
 {
+    /// <inheritdoc cref="IMetmuseumService"/>
     public class MetmuseumService : IMetmuseumService
     {
         private readonly IConfiguration _config;

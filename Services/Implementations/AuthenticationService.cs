@@ -7,6 +7,7 @@ using System.Text;
 
 namespace EverydayIsArtAPI.Services
 {
+    /// <inheritdoc cref="IAuthenticationService"/>
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IConfiguration _config;

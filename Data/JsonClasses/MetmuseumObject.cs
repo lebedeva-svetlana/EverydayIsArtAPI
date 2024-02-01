@@ -2,6 +2,9 @@
 
 namespace EverydayIsArtAPI.Data
 {
+    /// <summary>
+    ///     A JSON of The Metropolitan Museum of Art API.
+    /// </summary>
     public class MetmuseumObject
     {
         [JsonPropertyName("accessionNumber")]

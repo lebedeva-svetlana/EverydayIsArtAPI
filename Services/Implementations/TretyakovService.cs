@@ -2,6 +2,7 @@
 
 namespace EverydayIsArtAPI.Services
 {
+    /// <inheritdoc cref="ITretyakovService"/>
     public class TretyakovService : ITretyakovService
     {
         private readonly IConfiguration _config;
