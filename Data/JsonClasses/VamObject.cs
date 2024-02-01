@@ -115,13 +115,8 @@ namespace EverydayIsArtAPI.Data.VamObject
         [JsonPropertyName("dimensions")]
         public Dimension[] Dimensions { get; set; }
 
-        public string historicalContext { get; set; }
-
         [JsonPropertyName("images")]
         public string[] ImagesNumbers { get; set; }
-
-        //[JsonPropertyName("materials")]
-        //public Association[] Materials { get; set; }
 
         [JsonPropertyName("materialsAndTechniques")]
         public string Materials { get; set; }
