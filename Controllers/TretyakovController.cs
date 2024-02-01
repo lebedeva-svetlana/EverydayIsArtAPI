@@ -8,7 +8,7 @@ namespace EverydayIsArtAPI.Controllers
     /// </summary>
     [ApiController]
     [Route("random/[controller]")]
-    public class TretyakovController(ITretyakovService artService, ILogger<ArtController> logger) : ArtController(artService, logger)
+    public class TretyakovController(ITretyakovService artService) : ArtController(artService)
     {
     }
 }
