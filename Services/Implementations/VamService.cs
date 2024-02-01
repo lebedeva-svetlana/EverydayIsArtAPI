@@ -1,4 +1,5 @@
-﻿using EverydayIsArtAPI.Data.VamGallery;
+﻿using EverydayIsArtAPI.Controllers;
+using EverydayIsArtAPI.Data.VamGallery;
 using EverydayIsArtAPI.Data.VamObject;
 using EverydayIsArtAPI.Models;
 
@@ -8,28 +9,38 @@ namespace EverydayIsArtAPI.Services
     public class VamService : IVamService
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<VamService> _logger;
         private readonly HttpClient _httpClient = new();
 
-        public VamService(IConfiguration config)
+        public VamService(IConfiguration config, ILogger<VamService> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
-        public async Task<Art> GetArt()
+        public async Task<Art?> GetArt()
         {
-            string objectUrl = await GetSourceUrl();
-            VamObject? vamObject = (VamObject?)await _httpClient.GetFromJsonAsync(objectUrl, typeof(VamObject));
+            try
+            {
+                string objectUrl = await GetSourceUrl();
+                VamObject? vamObject = (VamObject?)await _httpClient.GetFromJsonAsync(objectUrl, typeof(VamObject));
 
-            Art art = new();
-            art.ImageUrl = _config.GetValue<string>("URL:Vam:ImageUrl").Replace("{ObjectNumber}", vamObject.Record.ImagesNumbers[0]);
-            art.Title = GetTitle(vamObject);
-            art.Date = GetDate(vamObject);
-            art.Author = GetAuthor(vamObject);
-            art.Description = GetDescription(vamObject);
-            art.SourceUrl = _config.GetValue<string>("URL:Vam:Art") + vamObject.Record.SystemNumber;
-            art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Vam");
+                Art art = new();
+                art.ImageUrl = _config.GetValue<string>("URL:Vam:ImageUrl").Replace("{ObjectNumber}", vamObject.Record.ImagesNumbers[0]);
+                art.Title = GetTitle(vamObject);
+                art.Date = GetDate(vamObject);
+                art.Author = GetAuthor(vamObject);
+                art.Description = GetDescription(vamObject);
+                art.SourceUrl = _config.GetValue<string>("URL:Vam:Art") + vamObject.Record.SystemNumber;
+                art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Vam");
 
-            return art;
+                return art;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred on VAM art receiving.");
+                return null;
+            }
         }
 
         private string Capitalize(string text)

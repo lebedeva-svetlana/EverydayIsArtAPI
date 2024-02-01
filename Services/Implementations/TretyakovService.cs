@@ -6,29 +6,39 @@ namespace EverydayIsArtAPI.Services
     public class TretyakovService : ITretyakovService
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<VamService> _logger;
         private readonly IHTMLService _htmlService;
 
-        public TretyakovService(IHTMLService htmlService, IConfiguration config)
+        public TretyakovService(IHTMLService htmlService, IConfiguration config, ILogger<VamService> logger)
         {
             _config = config;
             _htmlService = htmlService;
+            _logger = logger;
         }
 
-        public async Task<Art> GetArt()
+        public async Task<Art?> GetArt()
         {
-            string objectUrl = await GetSourceUrl();
-            object htmlDocument = await _htmlService.GetHTMLDocument(objectUrl);
+            try
+            {
+                string objectUrl = await GetSourceUrl();
+                object htmlDocument = await _htmlService.GetHTMLDocument(objectUrl);
 
-            Art art = new();
-            art.Description = GetDescription(htmlDocument);
-            art.Title = GetTitle(htmlDocument);
-            art.Author = GetAuthor(htmlDocument);
-            art.Date = GetDate(htmlDocument);
-            art.ImageUrl = GetImageUrl(htmlDocument);
-            art.SourceUrl = objectUrl;
-            art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Tretyakov");
+                Art art = new();
+                art.Description = GetDescription(htmlDocument);
+                art.Title = GetTitle(htmlDocument);
+                art.Author = GetAuthor(htmlDocument);
+                art.Date = GetDate(htmlDocument);
+                art.ImageUrl = GetImageUrl(htmlDocument);
+                art.SourceUrl = objectUrl;
+                art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Tretyakov");
 
-            return art;
+                return art;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred on Tretyakov art receiving.");
+                return null;
+            }
         }
 
         private IList<string>? GetArtSourcePart(object htmlDocument)

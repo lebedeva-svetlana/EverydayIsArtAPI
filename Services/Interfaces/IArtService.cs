@@ -13,6 +13,6 @@ namespace EverydayIsArtAPI.Services
         /// <returns>
         ///     The random exhibit.
         /// </returns>
-        public Task<Art> GetArt();
+        public Task<Art?> GetArt();
     }
 }

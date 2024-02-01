@@ -8,28 +8,38 @@ namespace EverydayIsArtAPI.Services
     public class MetmuseumService : IMetmuseumService
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<VamService> _logger;
         private readonly HttpClient _httpClient = new();
 
-        public MetmuseumService(IConfiguration config)
+        public MetmuseumService(IConfiguration config, ILogger<VamService> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         public async Task<Art> GetArt()
         {
-            string objectUrl = await GetSourceUrl();
-            var metmuseumObject = (MetmuseumObject?)await _httpClient.GetFromJsonAsync(objectUrl, typeof(MetmuseumObject));
+            try
+            {
+                string objectUrl = await GetSourceUrl();
+                var metmuseumObject = (MetmuseumObject?)await _httpClient.GetFromJsonAsync(objectUrl, typeof(MetmuseumObject));
 
-            Art art = new();
-            art.ImageUrl = metmuseumObject.ImageUrl;
-            art.Title = metmuseumObject.Title;
-            art.Date = Capitalize(metmuseumObject.Date);
-            art.Author = GetAuthor(metmuseumObject);
-            art.Description = GetDescription(metmuseumObject);
-            art.SourceUrl = metmuseumObject.SourceURL;
-            art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Metmuseum");
+                Art art = new();
+                art.ImageUrl = metmuseumObject.ImageUrl;
+                art.Title = metmuseumObject.Title;
+                art.Date = Capitalize(metmuseumObject.Date);
+                art.Author = GetAuthor(metmuseumObject);
+                art.Description = GetDescription(metmuseumObject);
+                art.SourceUrl = metmuseumObject.SourceURL;
+                art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Metmuseum");
 
-            return art;
+                return art;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred on Metmuseum art receiving.");
+                return null;
+            }
         }
 
         private string Capitalize(string text)

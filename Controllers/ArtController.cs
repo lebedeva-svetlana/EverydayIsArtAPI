@@ -29,16 +29,12 @@ namespace EverydayIsArtAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Art>> GetArt()
         {
-            try
+            var art = await _artService.GetArt();
+            if (art is null)
             {
-                var art = await _artService.GetArt();
-                return new JsonResult(art);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred on art receiving.");
                 return StatusCode(500, "Internal server error.");
             }
+            return new JsonResult(art);
         }
     }
 }
