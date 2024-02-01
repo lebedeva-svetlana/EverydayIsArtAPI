@@ -9,13 +9,11 @@ namespace EverydayIsArtAPI.Controllers
     /// </summary>
     public class ArtController : ControllerBase
     {
-        private readonly ILogger<ArtController> _logger;
         private IArtService _artService;
 
-        public ArtController(IArtService artService, ILogger<ArtController> logger)
+        public ArtController(IArtService artService)
         {
             _artService = artService;
-            _logger = logger;
         }
 
         /// <summary>
