@@ -33,10 +33,10 @@ namespace EverydayIsArtAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<string>> Login([FromBody] LoginRequest request)
         {
             string response = await _authenticationService.Login(request);
-            return Ok(response);
+            return response;
         }
 
         /// <summary>
@@ -53,10 +53,10 @@ namespace EverydayIsArtAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<string>> Register([FromBody] RegisterRequest request)
         {
             string response = await _authenticationService.Register(request);
-            return Ok(response);
+            return response;
         }
     }
 }
