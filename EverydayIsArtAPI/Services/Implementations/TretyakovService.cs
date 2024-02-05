@@ -6,7 +6,7 @@ namespace EverydayIsArtAPI.Services
     public class TretyakovService : ITretyakovService
     {
         private readonly IConfiguration _config;
-        private readonly ILogger<VamService> _logger;
+        private readonly ILogger<TretyakovService> _logger;
         private readonly IHTMLService _htmlService;
 
         public TretyakovService(IHTMLService htmlService, IConfiguration config, ILogger<VamService> logger)
