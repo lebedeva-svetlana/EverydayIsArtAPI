@@ -11,7 +11,7 @@ namespace EverydayIsArtAPI.Services
         private readonly ILogger<MetmuseumService> _logger;
         private readonly HttpClient _httpClient = new();
 
-        public MetmuseumService(IConfiguration config, ILogger<VamService> logger)
+        public MetmuseumService(IConfiguration config, ILogger<MetmuseumService> logger)
         {
             _config = config;
             _logger = logger;
