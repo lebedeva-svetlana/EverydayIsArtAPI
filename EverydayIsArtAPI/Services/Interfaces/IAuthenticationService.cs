@@ -14,9 +14,9 @@ namespace EverydayIsArtAPI.Services
         ///     A login request data.
         /// </param>
         /// <returns>
-        ///     An authentication token.
+        ///     A result of login.
         /// </returns>
-        Task<string> Login(LoginRequest request);
+        Task<AuthorizationResult> Login(LoginRequest request);
 
         /// <summary>
         ///     Registers a new user.
@@ -25,8 +25,8 @@ namespace EverydayIsArtAPI.Services
         ///     A registration request data.
         /// </param>
         /// <returns>
-        ///     An authentication token.
+        ///     A result of registration.
         /// </returns>
-        Task<string> Register(RegisterRequest request);
+        Task<AuthorizationResult> Register(RegisterRequest request);
     }
 }

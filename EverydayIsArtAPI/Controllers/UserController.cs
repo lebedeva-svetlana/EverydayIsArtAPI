@@ -1,4 +1,5 @@
-﻿using EverydayIsArtAPI.Models;
+﻿using EverydayIsArtAPI.Exceptions;
+using EverydayIsArtAPI.Models;
 using EverydayIsArtAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,8 +36,12 @@ namespace EverydayIsArtAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<string>> Login([FromBody] LoginRequest request)
         {
-            string response = await _authenticationService.Login(request);
-            return response;
+            var result = await _authenticationService.Login(request);
+            if (result.Exception is BadUserRequestException)
+            {
+                return BadRequest(result.Exception.Message);
+            }
+            return result.Token;
         }
 
         /// <summary>
@@ -55,8 +60,16 @@ namespace EverydayIsArtAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<string>> Register([FromBody] RegisterRequest request)
         {
-            string response = await _authenticationService.Register(request);
-            return response;
+            var result = await _authenticationService.Register(request);
+            if (result.Exception is BadUserRequestException)
+            {
+                return BadRequest(result.Exception.Message);
+            }
+            if (result.Exception is not null)
+            {
+                return StatusCode(500, result.Exception.Message);
+            }
+            return result.Token;
         }
     }
 }

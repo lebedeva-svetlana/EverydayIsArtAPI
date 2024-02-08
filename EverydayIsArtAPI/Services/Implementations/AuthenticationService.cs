@@ -1,4 +1,5 @@
-﻿using EverydayIsArtAPI.Models;
+﻿using EverydayIsArtAPI.Exceptions;
+using EverydayIsArtAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,14 +20,19 @@ namespace EverydayIsArtAPI.Services
             _userManager = userManager;
         }
 
-        public async Task<string> Login(LoginRequest request)
+        public async Task<AuthorizationResult> Login(LoginRequest request)
         {
             User? user = await _userManager.FindByNameAsync(request.Username);
             user ??= await _userManager.FindByEmailAsync(request.Username);
 
-            if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
+            if (user is null)
             {
-                throw new ArgumentException($"Unable to authenticate user {request.Username}");
+                return new AuthorizationResult(new BadUserRequestException($"Пользователя {request.Username} не существует."));
+            }
+
+            if (!await _userManager.CheckPasswordAsync(user, request.Password))
+            {
+                return new AuthorizationResult(new BadUserRequestException($"Введён неверный пароль."));
             }
 
             var claims = new List<Claim>
@@ -38,17 +44,17 @@ namespace EverydayIsArtAPI.Services
 
             var token = GetToken(claims);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new AuthorizationResult(new JwtSecurityTokenHandler().WriteToken(token));
         }
 
-        public async Task<string> Register(RegisterRequest request)
+        public async Task<AuthorizationResult> Register(RegisterRequest request)
         {
             User? userByEmail = await _userManager.FindByEmailAsync(request.Email);
             User? userByUsername = await _userManager.FindByNameAsync(request.Username);
 
             if (userByEmail is not null || userByUsername is not null)
             {
-                throw new ArgumentException($"User with email {request.Email} or username {request.Username} already exists.");
+                return new AuthorizationResult(new BadUserRequestException($"Пользователь с почтой {request.Email} или логином {request.Username} уже существует."));
             }
 
             User user = new()
@@ -62,7 +68,8 @@ namespace EverydayIsArtAPI.Services
 
             if (!result.Succeeded)
             {
-                throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
+                //$"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}";
+                return new AuthorizationResult(new ArgumentException($"Невозможно зарегистрировать пользователя. Повторите позже."));
             }
 
             return await Login(new LoginRequest { Username = request.Email, Password = request.Password });
