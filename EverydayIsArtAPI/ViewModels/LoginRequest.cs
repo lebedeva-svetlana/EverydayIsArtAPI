@@ -14,7 +14,7 @@ namespace EverydayIsArtAPI.Models
         ///     The name or email of the user.
         /// </value>
         [Required]
-        public string? Username { get; set; }
+        public string? Login { get; set; }
 
         /// <summary>
         ///     Gets or sets a password of an user.
