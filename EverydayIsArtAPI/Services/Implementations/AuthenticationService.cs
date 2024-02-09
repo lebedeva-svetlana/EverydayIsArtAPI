@@ -22,17 +22,17 @@ namespace EverydayIsArtAPI.Services
 
         public async Task<AuthorizationResult> Login(LoginRequest request)
         {
-            User? user = await _userManager.FindByNameAsync(request.Username);
-            user ??= await _userManager.FindByEmailAsync(request.Username);
+            User? user = await _userManager.FindByNameAsync(request.Login);
+            user ??= await _userManager.FindByEmailAsync(request.Login);
 
             if (user is null)
             {
-                return new AuthorizationResult(new BadUserRequestException($"Пользователя {request.Username} не существует."));
+                return new AuthorizationResult(new UserDoesntExists($"Пользователя {request.Login} не существует."));
             }
 
             if (!await _userManager.CheckPasswordAsync(user, request.Password))
             {
-                return new AuthorizationResult(new BadUserRequestException($"Введён неверный пароль."));
+                return new AuthorizationResult(new WrongPasswordException($"Введён неверный пароль."));
             }
 
             var claims = new List<Claim>
@@ -54,7 +54,7 @@ namespace EverydayIsArtAPI.Services
 
             if (userByEmail is not null || userByUsername is not null)
             {
-                return new AuthorizationResult(new BadUserRequestException($"Пользователь с почтой {request.Email} или логином {request.Username} уже существует."));
+                return new AuthorizationResult(new UserExistsException($"Пользователь с почтой {request.Email} или логином {request.Username} уже существует."));
             }
 
             User user = new()
@@ -69,10 +69,10 @@ namespace EverydayIsArtAPI.Services
             if (!result.Succeeded)
             {
                 //$"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}";
-                return new AuthorizationResult(new ArgumentException($"Невозможно зарегистрировать пользователя. Повторите позже."));
+                return new AuthorizationResult(new ArgumentException($"Невозможно зарегистрировать пользователя."));
             }
 
-            return await Login(new LoginRequest { Username = request.Email, Password = request.Password });
+            return await Login(new LoginRequest { Login = request.Email, Password = request.Password });
         }
 
         private string GetErrorsText(IEnumerable<IdentityError> errors)

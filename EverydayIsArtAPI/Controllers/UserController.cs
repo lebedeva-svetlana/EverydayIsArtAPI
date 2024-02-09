@@ -3,6 +3,7 @@ using EverydayIsArtAPI.Models;
 using EverydayIsArtAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace EverydayIsArtAPI.Controllers
 {
@@ -14,10 +15,12 @@ namespace EverydayIsArtAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly IOptions<ApiBehaviorOptions> _apiBehaviorOptions;
 
-        public UserController(IAuthenticationService authenticationService)
+        public UserController(IAuthenticationService authenticationService, IOptions<ApiBehaviorOptions> apiBehaviorOptions)
         {
             _authenticationService = authenticationService;
+            _apiBehaviorOptions = apiBehaviorOptions;
         }
 
         /// <summary>
@@ -31,17 +34,31 @@ namespace EverydayIsArtAPI.Controllers
         /// </returns>
         [AllowAnonymous]
         [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<string>> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _authenticationService.Login(request);
-            if (result.Exception is BadUserRequestException)
+
+            if (result.Exception is null)
             {
-                return BadRequest(result.Exception.Message);
+                return Ok(result.Token);
             }
-            return result.Token;
+
+            string key = "";
+
+            if (result.Exception is UserDoesntExists)
+            {
+                key = "user";
+            }
+            else if (result.Exception is WrongPasswordException)
+            {
+                key = "password";
+            }
+
+            ModelState.AddModelError(key, result.Exception.Message);
+            return _apiBehaviorOptions.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
 
         /// <summary>
@@ -55,21 +72,31 @@ namespace EverydayIsArtAPI.Controllers
         /// </returns>
         [AllowAnonymous]
         [HttpPost("register")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<string>> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             var result = await _authenticationService.Register(request);
-            if (result.Exception is BadUserRequestException)
+            if (result.Exception is null)
             {
-                return BadRequest(result.Exception.Message);
+                return Ok(result.Token);
             }
-            if (result.Exception is not null)
+
+            if (result.Exception is not IBadRequestException)
             {
                 return StatusCode(500, result.Exception.Message);
             }
-            return result.Token;
+
+            string key = "";
+
+            if (result.Exception is UserExistsException)
+            {
+                key = "user";
+            }
+
+            ModelState.AddModelError(key, result.Exception.Message);
+            return _apiBehaviorOptions.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }
