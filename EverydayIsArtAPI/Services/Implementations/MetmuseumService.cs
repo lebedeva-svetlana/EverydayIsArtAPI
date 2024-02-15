@@ -29,7 +29,17 @@ namespace EverydayIsArtAPI.Services
                 art.Title = metmuseumObject.Title;
                 art.Date = Capitalize(metmuseumObject.Date);
                 art.Author = GetAuthor(metmuseumObject);
-                art.Description = GetDescription(metmuseumObject);
+                art.PlaceOfOrigin = GetPlaceOfOrigin(metmuseumObject);
+                art.Medium = GetDimension(metmuseumObject);
+
+                string? medium = GetMedium(metmuseumObject);
+                if (medium != null)
+                {
+                    art.Medium?.Add(medium);
+                }
+
+                art.AccessNumber = GetAccessionNumber(metmuseumObject);
+                art.WayToGet = GetWayToGet(metmuseumObject);
                 art.SourceUrl = metmuseumObject.SourceURL;
                 art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Metmuseum");
 
@@ -47,7 +57,7 @@ namespace EverydayIsArtAPI.Services
             return char.ToUpper(text[0]) + text[1..];
         }
 
-        private string? GetAccessionNumberPart(MetmuseumObject metmuseumObject)
+        private string? GetAccessionNumber(MetmuseumObject metmuseumObject)
         {
             return metmuseumObject.AccessionNumber.Length == 0 ? null : $"Accession number: {metmuseumObject.AccessionNumber}";
         }
@@ -87,89 +97,27 @@ namespace EverydayIsArtAPI.Services
             return authors;
         }
 
-        private string? GetCreditPart(MetmuseumObject metmuseumObject)
+        private IList<string>? GetWayToGet(MetmuseumObject metmuseumObject)
         {
-            return metmuseumObject.CreditLine.Length == 0 ? null : metmuseumObject.CreditLine;
+            string? way = metmuseumObject.CreditLine.Length == 0 ? null : metmuseumObject.CreditLine;
+            if (way is null)
+            {
+                return null;
+            }
+            return new List<string>() { way };
         }
 
-        private IList<DescriptionGroup>? GetDescription(MetmuseumObject metmuseumObject)
-        {
-            List<DescriptionGroup> description = new();
-
-            var placeOfOrigin = GetPlaceOfOriginPart(metmuseumObject);
-            if (placeOfOrigin != null)
-            {
-                description.Add(new DescriptionGroup(placeOfOrigin));
-            }
-
-            var dimension = GetDimensionPart(metmuseumObject);
-            if (dimension != null)
-            {
-                description.Add(new DescriptionGroup(dimension));
-            }
-
-            var medium = GetMediumPart(metmuseumObject);
-            if (medium != null)
-            {
-                if (description.Count == 2)
-                {
-                    description[1].Parts.Add(medium);
-                }
-                else if (placeOfOrigin is not null && dimension is null)
-                {
-                    description.Add(new DescriptionGroup(medium));
-                }
-                else if (placeOfOrigin is null && dimension is not null)
-                {
-                    description[0].Parts.Add(medium);
-                }
-                else
-                {
-                    description.Add(new DescriptionGroup(medium));
-                }
-            }
-
-            var accessionNumber = GetAccessionNumberPart(metmuseumObject);
-            if (accessionNumber != null)
-            {
-                if (description.Count == 2)
-                {
-                    description[1].Parts.Add(accessionNumber);
-                }
-                else if (placeOfOrigin is not null && description.Count == 1)
-                {
-                    description.Add(new DescriptionGroup(accessionNumber));
-                }
-                else if (placeOfOrigin is null && description.Count == 1)
-                {
-                    description[0].Parts.Add(accessionNumber);
-                }
-                else
-                {
-                    description.Add(new DescriptionGroup(accessionNumber));
-                }
-            }
-
-            var credit = GetCreditPart(metmuseumObject);
-            if (credit != null)
-            {
-                description.Add(new DescriptionGroup(credit));
-            }
-
-            return description;
-        }
-
-        private IList<string>? GetDimensionPart(MetmuseumObject metmuseumObject)
+        private IList<string>? GetDimension(MetmuseumObject metmuseumObject)
         {
             return metmuseumObject.Dimensions.Length == 0 ? null : new List<string>() { $"Dimensions: {metmuseumObject.Dimensions}" };
         }
 
-        private string? GetMediumPart(MetmuseumObject metmuseumObject)
+        private string? GetMedium(MetmuseumObject metmuseumObject)
         {
             return metmuseumObject.Medium == "" ? null : $"Materials: {metmuseumObject.Medium}";
         }
 
-        private List<string>? GetPlaceOfOriginPart(MetmuseumObject metmuseumObject)
+        private List<string>? GetPlaceOfOrigin(MetmuseumObject metmuseumObject)
         {
             if (metmuseumObject.GeographyType.Length == 0 && metmuseumObject.City.Length == 0 && metmuseumObject.State.Length == 0 && metmuseumObject.County.Length == 0 && metmuseumObject.County.Length == 0 && metmuseumObject.Culture.Length == 0)
             {
@@ -184,6 +132,8 @@ namespace EverydayIsArtAPI.Services
             place += GetPlaceString(metmuseumObject.State, needComma, out needComma);
             place += GetPlaceString(metmuseumObject.County, needComma, out needComma);
             place += GetPlaceString(metmuseumObject.Country, needComma, out _);
+
+            place = place.Trim();
 
             if (place.Length == 0)
             {

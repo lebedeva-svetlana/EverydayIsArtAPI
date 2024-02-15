@@ -6,6 +6,14 @@
     public class Art
     {
         /// <summary>
+        ///     Gets or sets an ID of an art.
+        /// </summary>
+        /// <value>
+        ///     The ID of the art.
+        /// </value>
+        public int Id { get; set; }
+
+        /// <summary>
         ///     Gets or sets a title of an exhibit.
         /// </summary>
         /// <value>
@@ -22,7 +30,7 @@
         public string? Date { get; set; }
 
         /// <summary>
-        ///     Gets or sets an exhibit authors.
+        ///     Gets or sets exhibit authors.
         /// </summary>
         /// <value>
         ///     The exhibit authors.
@@ -30,12 +38,44 @@
         public IList<string>? Author { get; set; }
 
         /// <summary>
+        ///     Gets or sets a places of origin of an exhibit.
+        /// </summary>
+        /// <value>
+        ///     The places of origin of the exhibit.
+        /// </value>
+        public IList<string>? PlaceOfOrigin { get; set; }
+
+        /// <summary>
+        ///     Gets or sets an exhibit medium.
+        /// </summary>
+        /// <value>
+        ///     The exhibit medium.
+        /// </value>
+        public IList<string>? Medium { get; set; }
+
+        /// <summary>
+        ///     Gets or sets an access number of an exhibit.
+        /// </summary>
+        /// <value>
+        ///     The access number of the exhibit.
+        /// </value>
+        public string? AccessNumber { get; set; }
+
+        /// <summary>
+        ///     Gets or sets sources of an exhibit.
+        /// </summary>
+        /// <value>
+        ///     The sources of the exhibit.
+        /// </value>
+        public IList<string>? WayToGet { get; set; }
+
+        /// <summary>
         ///     Gets or sets an exhibit description.
         /// </summary>
         /// <value>
         ///     The exhibit description.
         /// </value>
-        public IList<DescriptionGroup>? Description { get; set; }
+        public IList<string>? Description { get; set; }
 
         /// <summary>
         ///     Gets or sets an exhibit image URL.

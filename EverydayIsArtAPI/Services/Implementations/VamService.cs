@@ -1,5 +1,4 @@
-﻿using EverydayIsArtAPI.Controllers;
-using EverydayIsArtAPI.Data.VamGallery;
+﻿using EverydayIsArtAPI.Data.VamGallery;
 using EverydayIsArtAPI.Data.VamObject;
 using EverydayIsArtAPI.Models;
 
@@ -30,6 +29,17 @@ namespace EverydayIsArtAPI.Services
                 art.Title = GetTitle(vamObject);
                 art.Date = GetDate(vamObject);
                 art.Author = GetAuthor(vamObject);
+                art.PlaceOfOrigin = GetPlaceOfOrigin(vamObject);
+
+                art.Medium = GetDimension(vamObject);
+                string? medium = GetMedium(vamObject);
+                if (medium is not null)
+                {
+                    art.Medium?.Add(medium);
+                }
+
+                art.AccessNumber = GetAccessionNumber(vamObject);
+                art.WayToGet = GetWayToGet(vamObject);
                 art.Description = GetDescription(vamObject);
                 art.SourceUrl = _config.GetValue<string>("URL:Vam:Art") + vamObject.Record.SystemNumber;
                 art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Vam");
@@ -48,7 +58,7 @@ namespace EverydayIsArtAPI.Services
             return char.ToUpper(text[0]) + text[1..];
         }
 
-        private string? GetAccessionNumberPart(VamObject vamObject)
+        private string? GetAccessionNumber(VamObject vamObject)
         {
             if (vamObject.Record.AccessionNumber is null)
             {
@@ -84,7 +94,7 @@ namespace EverydayIsArtAPI.Services
             return authors;
         }
 
-        private string? GetBriefDescriptionPart(VamObject vamObject)
+        private string? GetBriefDescription(VamObject vamObject)
         {
             if (vamObject.Record.BriefDescription is null || vamObject.Record.BriefDescription == "")
             {
@@ -94,9 +104,14 @@ namespace EverydayIsArtAPI.Services
             return $"Brief description: {vamObject.Record.BriefDescription}";
         }
 
-        private string? GetCreditPart(VamObject vamObject)
+        private IList<string>? GetWayToGet(VamObject vamObject)
         {
-            return vamObject.Record.CreditLine is null ? null : vamObject.Record.CreditLine;
+            var way = vamObject.Record.CreditLine is null ? null : vamObject.Record.CreditLine;
+            if (way is null || way.Length == 0)
+            {
+                return null;
+            }
+            return new List<string>() { way };
         }
 
         private string? GetDate(VamObject vamObject)
@@ -120,89 +135,26 @@ namespace EverydayIsArtAPI.Services
             return date;
         }
 
-        private IList<DescriptionGroup>? GetDescription(VamObject vamObject)
+        private IList<string>? GetDescription(VamObject vamObject)
         {
-            List<DescriptionGroup> description = new();
+            List<string> description = new();
 
-            var placeOfOrigin = GetPlaceOfOriginPart(vamObject);
-            if (placeOfOrigin != null)
+            var briefDescription = GetBriefDescription(vamObject);
+            if (briefDescription is not null)
             {
-                description.Add(new DescriptionGroup(placeOfOrigin));
+                description.Add(briefDescription);
             }
 
-            var dimension = GetDimensionPart(vamObject);
-            if (dimension != null)
+            var summary = GetSummary(vamObject);
+            if (summary is not null)
             {
-                description.Add(new DescriptionGroup(dimension));
-            }
-
-            var medium = GetMediumPart(vamObject);
-            if (medium != null)
-            {
-                if (description.Count == 2)
-                {
-                    description[1].Parts.Add(medium);
-                }
-                else if (placeOfOrigin is not null && dimension is null)
-                {
-                    description.Add(new DescriptionGroup(medium));
-                }
-                else if (placeOfOrigin is null && dimension is not null)
-                {
-                    description[0].Parts.Add(medium);
-                }
-                else
-                {
-                    description.Add(new DescriptionGroup(medium));
-                }
-            }
-
-            var accessionNumber = GetAccessionNumberPart(vamObject);
-            if (accessionNumber != null)
-            {
-                if (description.Count == 2)
-                {
-                    description[1].Parts.Add(accessionNumber);
-                }
-                else if (placeOfOrigin is not null && description.Count == 1)
-                {
-                    description.Add(new DescriptionGroup(accessionNumber));
-                }
-                else if (placeOfOrigin is null && description.Count == 1)
-                {
-                    description[0].Parts.Add(accessionNumber);
-                }
-                else
-                {
-                    description.Add(new DescriptionGroup(accessionNumber));
-                }
-            }
-
-            var credit = GetCreditPart(vamObject);
-            if (credit != null)
-            {
-                description.Add(new DescriptionGroup(credit));
-            }
-
-            var briefDescription = GetBriefDescriptionPart(vamObject);
-            if (briefDescription != null)
-            {
-                description.Add(new DescriptionGroup(briefDescription));
-            }
-
-            var summary = GetSummaryPart(vamObject);
-            if (summary != null)
-            {
-                for (int i = 0; i < summary.Count; ++i)
-                {
-                    description.Add(new DescriptionGroup(summary[i]));
-                }
+                description.AddRange(summary);
             }
 
             return description;
         }
 
-        private IList<string>? GetDimensionPart(VamObject vamObject)
+        private IList<string>? GetDimension(VamObject vamObject)
         {
             if (vamObject.Record.Dimensions is null || vamObject.Record.Dimensions.Length == 0)
             {
@@ -245,12 +197,12 @@ namespace EverydayIsArtAPI.Services
             return url + new Random().Next(1, end);
         }
 
-        private string? GetMediumPart(VamObject vamObject)
+        private string? GetMedium(VamObject vamObject)
         {
             return vamObject.Record.Materials == "" ? null : $"Materials and techniques: {vamObject.Record.Materials}";
         }
 
-        private List<string>? GetPlaceOfOriginPart(VamObject vamObject)
+        private List<string>? GetPlaceOfOrigin(VamObject vamObject)
         {
             if (vamObject.Record.PlacesOfOrigin is null || vamObject.Record.PlacesOfOrigin.Length == 0)
             {
@@ -280,7 +232,7 @@ namespace EverydayIsArtAPI.Services
             return _config.GetValue<string>("URL:Vam:ArtJson") + objectNumber;
         }
 
-        private List<string>? GetSummaryPart(VamObject vamObject)
+        private List<string>? GetSummary(VamObject vamObject)
         {
             if (vamObject.Record.Summary is null)
             {
@@ -297,7 +249,7 @@ namespace EverydayIsArtAPI.Services
                 separator = "\n\n";
             }
 
-            return RemoveTags(vamObject.Record.Summary).Split(separator).ToList();
+            return RemoveTags(vamObject.Record.Summary).Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         }
 
         private string? GetTitle(VamObject vamObject)

@@ -28,6 +28,13 @@ namespace EverydayIsArtAPI.Services
                 art.Title = GetTitle(htmlDocument);
                 art.Author = GetAuthor(htmlDocument);
                 art.Date = GetDate(htmlDocument);
+
+                var medium = GetMeduim(htmlDocument);
+                art.AccessNumber = medium?.LastOrDefault();
+                medium?.RemoveAt(medium.Count - 1);
+                art.Medium = medium;
+
+                art.WayToGet = GetWayToGet(htmlDocument);
                 art.ImageUrl = GetImageUrl(htmlDocument);
                 art.SourceUrl = objectUrl;
                 art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Tretyakov");
@@ -41,7 +48,7 @@ namespace EverydayIsArtAPI.Services
             }
         }
 
-        private IList<string>? GetArtSourcePart(object htmlDocument)
+        private IList<string>? GetWayToGet(object htmlDocument)
         {
             string selector = _config.GetValue<string>("Selector:Tretyakov:ArtSource");
             return GetPart(htmlDocument, selector);
@@ -64,43 +71,17 @@ namespace EverydayIsArtAPI.Services
             return _htmlService.NormalizeNodeInnerText(_htmlService.GetNodesInnerText(htmlDocument, selector)[1]);
         }
 
-        private IList<DescriptionGroup>? GetDescription(object htmlDocument)
+        private IList<string>? GetDescription(object htmlDocument)
         {
-            List<DescriptionGroup> description = new();
+            string selector = _config.GetValue<string>("Selector:Tretyakov:ArtDesciption");
+            var description = GetPart(htmlDocument, selector);
 
-            var mediumPart = GetMeduimPart(htmlDocument);
-            if (mediumPart is not null)
-            {
-                description.Add(new DescriptionGroup(mediumPart));
-            }
-
-            var artSourcePart = GetArtSourcePart(htmlDocument);
-            if (artSourcePart is not null)
-            {
-                description.Add(new DescriptionGroup(artSourcePart));
-            }
-
-            var descriptionPart = GetDescriptionPart(htmlDocument);
-            if (descriptionPart is not null)
-            {
-                for (int i = 0; i < descriptionPart.Count; ++i)
-                {
-                    description.Add(new DescriptionGroup(descriptionPart[i]));
-                }
-            }
-
-            if (description.Count == 0)
+            if (description?.Count == 0)
             {
                 return null;
             }
 
             return description;
-        }
-
-        private IList<string>? GetDescriptionPart(object htmlDocument)
-        {
-            string selector = _config.GetValue<string>("Selector:Tretyakov:ArtDesciption");
-            return GetPart(htmlDocument, selector);
         }
 
         private string GetGalleryUrl()
@@ -116,7 +97,7 @@ namespace EverydayIsArtAPI.Services
             return _htmlService.GetAttributeValue(htmlDocument, selector, "src");
         }
 
-        private IList<string>? GetMeduimPart(object htmlDocument)
+        private IList<string>? GetMeduim(object htmlDocument)
         {
             string selector = _config.GetValue<string>("Selector:Tretyakov:ArtMedium");
             return GetPart(htmlDocument, selector);
