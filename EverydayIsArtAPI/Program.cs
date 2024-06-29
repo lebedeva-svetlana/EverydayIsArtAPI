@@ -51,8 +51,6 @@ builder.Services.Configure<RouteOptions>(options =>
     options.LowercaseUrls = true;
 });
 
-builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(oprions =>
 {
     oprions.SwaggerDoc("v1", new OpenApiInfo { Title = "EverydayIsArt API", Version = "v1" });
