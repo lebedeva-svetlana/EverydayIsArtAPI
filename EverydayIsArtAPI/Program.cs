@@ -111,7 +111,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(reactClient);
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
