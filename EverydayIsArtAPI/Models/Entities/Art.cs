@@ -100,5 +100,7 @@
         ///     The exhibit credit text.
         /// </value>
         public string SourceUrlText { get; set; }
+
+        public List<FavouritesGroup> FavouritesGroups { get; } = [];
     }
 }
