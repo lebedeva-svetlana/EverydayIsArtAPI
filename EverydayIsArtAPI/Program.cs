@@ -28,7 +28,7 @@ var reactClient = "_reactClient";
 builder.Services.AddCors(options => options.AddPolicy(name: reactClient,
     policy =>
     {
-        policy.WithOrigins("https://everydayisart.ru/")
+        policy.WithOrigins("https://everydayisart.ru")
               .AllowAnyMethod()
               .AllowAnyHeader();
     }
