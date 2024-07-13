@@ -7,7 +7,7 @@ namespace EverydayIsArtAPI.Controllers
     ///     A controller that provides access to the Victoria and Albert Museum exhibits.
     /// </summary>
     [ApiController]
-    [Route("random/[controller]")]
+    [Route("[controller]")]
     public class VamController(IVamService artService) : ArtController(artService)
     {
     }

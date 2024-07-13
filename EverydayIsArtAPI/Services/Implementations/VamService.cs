@@ -8,8 +8,8 @@ namespace EverydayIsArtAPI.Services
     public class VamService : IVamService
     {
         private readonly IConfiguration _config;
-        private readonly ILogger<VamService> _logger;
         private readonly HttpClient _httpClient = new();
+        private readonly ILogger<VamService> _logger;
 
         public VamService(IConfiguration config, ILogger<VamService> logger)
         {
@@ -17,40 +17,21 @@ namespace EverydayIsArtAPI.Services
             _logger = logger;
         }
 
-        public async Task<Art?> GetArt()
+        public async Task<Art?> GetArt(string url)
         {
-            try
+            string? objectNumber = GetObjectNumFromURL(url);
+            if (objectNumber is null)
             {
-                string objectUrl = await GetSourceUrl();
-                VamObject? vamObject = (VamObject?)await _httpClient.GetFromJsonAsync(objectUrl, typeof(VamObject));
-
-                Art art = new();
-                art.ImageUrl = _config.GetValue<string>("URL:Vam:ImageUrl").Replace("{ObjectNumber}", vamObject.Record.ImagesNumbers[0]);
-                art.Title = GetTitle(vamObject);
-                art.Date = GetDate(vamObject);
-                art.Author = GetAuthor(vamObject);
-                art.PlaceOfOrigin = GetPlaceOfOrigin(vamObject);
-
-                art.Medium = GetDimension(vamObject);
-                string? medium = GetMedium(vamObject);
-                if (medium is not null)
-                {
-                    art.Medium?.Add(medium);
-                }
-
-                art.AccessNumber = GetAccessionNumber(vamObject);
-                art.WayToGet = GetWayToGet(vamObject);
-                art.Description = GetDescription(vamObject);
-                art.SourceUrl = _config.GetValue<string>("URL:Vam:Art") + vamObject.Record.SystemNumber;
-                art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Vam");
-
-                return art;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred on VAM art receiving.");
                 return null;
             }
+            url = await GetSourceUrl(objectNumber);
+            return await GetBaseArt(url);
+        }
+
+        public async Task<Art?> GetArt()
+        {
+            string url = await GetSourceUrl();
+            return await GetBaseArt(url);
         }
 
         private string Capitalize(string text)
@@ -94,6 +75,41 @@ namespace EverydayIsArtAPI.Services
             return authors;
         }
 
+        private async Task<Art?> GetBaseArt(string url)
+        {
+            try
+            {
+                VamObject? vamObject = (VamObject?)await _httpClient.GetFromJsonAsync(url, typeof(VamObject));
+
+                Art art = new();
+                art.ImageUrl = _config.GetValue<string>("URL:Vam:ImageUrl").Replace("{ObjectNumber}", vamObject.Record.ImagesNumbers[0]);
+                art.Title = GetTitle(vamObject);
+                art.Date = GetDate(vamObject);
+                art.Author = GetAuthor(vamObject);
+                art.PlaceOfOrigin = GetPlaceOfOrigin(vamObject);
+
+                art.Medium = GetDimension(vamObject);
+                string? medium = GetMedium(vamObject);
+                if (medium is not null)
+                {
+                    art.Medium?.Add(medium);
+                }
+
+                art.AccessNumber = GetAccessionNumber(vamObject);
+                art.WayToGet = GetWayToGet(vamObject);
+                art.Description = GetDescription(vamObject);
+                art.SourceUrl = _config.GetValue<string>("URL:Vam:Art") + vamObject.Record.SystemNumber;
+                art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Vam");
+
+                return art;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred on VAM art receiving.");
+                return null;
+            }
+        }
+
         private string? GetBriefDescription(VamObject vamObject)
         {
             if (vamObject.Record.BriefDescription is null || vamObject.Record.BriefDescription == "")
@@ -102,16 +118,6 @@ namespace EverydayIsArtAPI.Services
             }
 
             return $"Brief description: {vamObject.Record.BriefDescription}";
-        }
-
-        private IList<string>? GetWayToGet(VamObject vamObject)
-        {
-            var way = vamObject.Record.CreditLine is null ? null : vamObject.Record.CreditLine;
-            if (way is null || way.Length == 0)
-            {
-                return null;
-            }
-            return new List<string>() { way };
         }
 
         private string? GetDate(VamObject vamObject)
@@ -202,6 +208,25 @@ namespace EverydayIsArtAPI.Services
             return vamObject.Record.Materials == "" ? null : $"Materials and techniques: {vamObject.Record.Materials}";
         }
 
+        private string? GetObjectNumFromURL(string url)
+        {
+            try
+            {
+                int lastIndex = url.LastIndexOf('/');
+                if (lastIndex == url.Length - 1)
+                {
+                    url = url.Remove(lastIndex);
+                }
+                url = url.Remove(url.LastIndexOf('/'));
+                lastIndex = url.LastIndexOf('/') + 1;
+                return url[lastIndex..];
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred on GetObjectNumFromURL.");
+                return null;
+            }
+        }
         private List<string>? GetPlaceOfOrigin(VamObject vamObject)
         {
             if (vamObject.Record.PlacesOfOrigin is null || vamObject.Record.PlacesOfOrigin.Length == 0)
@@ -224,11 +249,11 @@ namespace EverydayIsArtAPI.Services
             return places;
         }
 
-        private async Task<string> GetSourceUrl()
+        private async Task<string> GetSourceUrl(string objectNumber = null)
         {
             VamGallery? gallery = (VamGallery?)await _httpClient.GetFromJsonAsync(GetGalleryUrl(), typeof(VamGallery));
             int end = _config.GetValue<int>("ObjectsNumber:Vam:Art");
-            string objectNumber = gallery.Objects[new Random().Next(0, end)].ObjectNumber;
+            objectNumber ??= gallery.Objects[new Random().Next(0, end)].ObjectNumber;
             return _config.GetValue<string>("URL:Vam:ArtJson") + objectNumber;
         }
 
@@ -271,6 +296,16 @@ namespace EverydayIsArtAPI.Services
             }
 
             return title;
+        }
+
+        private IList<string>? GetWayToGet(VamObject vamObject)
+        {
+            var way = vamObject.Record.CreditLine is null ? null : vamObject.Record.CreditLine;
+            if (way is null || way.Length == 0)
+            {
+                return null;
+            }
+            return new List<string>() { way };
         }
 
         private string RemoveTags(string text)

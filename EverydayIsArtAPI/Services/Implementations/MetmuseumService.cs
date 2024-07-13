@@ -8,8 +8,8 @@ namespace EverydayIsArtAPI.Services
     public class MetmuseumService : IMetmuseumService
     {
         private readonly IConfiguration _config;
-        private readonly ILogger<MetmuseumService> _logger;
         private readonly HttpClient _httpClient = new();
+        private readonly ILogger<MetmuseumService> _logger;
 
         public MetmuseumService(IConfiguration config, ILogger<MetmuseumService> logger)
         {
@@ -17,39 +17,21 @@ namespace EverydayIsArtAPI.Services
             _logger = logger;
         }
 
-        public async Task<Art> GetArt()
+        public async Task<Art?> GetArt(string url)
         {
-            try
+            int objectNumber = GetObjectNumFromURL(url);
+            if (objectNumber == -1)
             {
-                string objectUrl = await GetSourceUrl();
-                var metmuseumObject = (MetmuseumObject?)await _httpClient.GetFromJsonAsync(objectUrl, typeof(MetmuseumObject));
-
-                Art art = new();
-                art.ImageUrl = metmuseumObject.ImageUrl;
-                art.Title = metmuseumObject.Title;
-                art.Date = Capitalize(metmuseumObject.Date);
-                art.Author = GetAuthor(metmuseumObject);
-                art.PlaceOfOrigin = GetPlaceOfOrigin(metmuseumObject);
-                art.Medium = GetDimension(metmuseumObject);
-
-                string? medium = GetMedium(metmuseumObject);
-                if (medium != null)
-                {
-                    art.Medium?.Add(medium);
-                }
-
-                art.AccessNumber = GetAccessionNumber(metmuseumObject);
-                art.WayToGet = GetWayToGet(metmuseumObject);
-                art.SourceUrl = metmuseumObject.SourceURL;
-                art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Metmuseum");
-
-                return art;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred on Metmuseum art receiving.");
                 return null;
             }
+            url = await GetSourceUrl(objectNumber);
+            return await GetBaseArt(url);
+        }
+
+        public async Task<Art?> GetArt()
+        {
+            string url = await GetSourceUrl();
+            return await GetBaseArt(url);
         }
 
         private string Capitalize(string text)
@@ -97,14 +79,38 @@ namespace EverydayIsArtAPI.Services
             return authors;
         }
 
-        private IList<string>? GetWayToGet(MetmuseumObject metmuseumObject)
+        private async Task<Art?> GetBaseArt(string url)
         {
-            string? way = metmuseumObject.CreditLine.Length == 0 ? null : metmuseumObject.CreditLine;
-            if (way is null)
+            try
             {
+                var metmuseumObject = (MetmuseumObject?)await _httpClient.GetFromJsonAsync(url, typeof(MetmuseumObject));
+
+                Art art = new();
+                art.ImageUrl = metmuseumObject.ImageUrl;
+                art.Title = metmuseumObject.Title;
+                art.Date = Capitalize(metmuseumObject.Date);
+                art.Author = GetAuthor(metmuseumObject);
+                art.PlaceOfOrigin = GetPlaceOfOrigin(metmuseumObject);
+                art.Medium = GetDimension(metmuseumObject);
+
+                string? medium = GetMedium(metmuseumObject);
+                if (medium != null)
+                {
+                    art.Medium?.Add(medium);
+                }
+
+                art.AccessNumber = GetAccessionNumber(metmuseumObject);
+                art.WayToGet = GetWayToGet(metmuseumObject);
+                art.SourceUrl = metmuseumObject.SourceURL;
+                art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Metmuseum");
+
+                return art;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred on Metmuseum art receiving.");
                 return null;
             }
-            return new List<string>() { way };
         }
 
         private IList<string>? GetDimension(MetmuseumObject metmuseumObject)
@@ -117,6 +123,24 @@ namespace EverydayIsArtAPI.Services
             return metmuseumObject.Medium == "" ? null : $"Materials: {metmuseumObject.Medium}";
         }
 
+        private int GetObjectNumFromURL(string url)
+        {
+            try
+            {
+                int lastIndex = url.LastIndexOf('/');
+                if (lastIndex == url.Length - 1)
+                {
+                    url = url.Remove(lastIndex);
+                }
+                lastIndex = url.LastIndexOf('/') + 1;
+                return Convert.ToInt32(url[lastIndex..]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred on GetObjectNumFromURL.");
+                return -1;
+            }
+        }
         private List<string>? GetPlaceOfOrigin(MetmuseumObject metmuseumObject)
         {
             if (metmuseumObject.GeographyType.Length == 0 && metmuseumObject.City.Length == 0 && metmuseumObject.State.Length == 0 && metmuseumObject.County.Length == 0 && metmuseumObject.County.Length == 0 && metmuseumObject.Culture.Length == 0)
@@ -157,12 +181,25 @@ namespace EverydayIsArtAPI.Services
             return placePart;
         }
 
-        private async Task<string> GetSourceUrl()
+        private async Task<string> GetSourceUrl(int objectNumber = -1)
         {
             string jsonString = File.ReadAllText("Data/metmuseumIds.json");
             var gallery = JsonSerializer.Deserialize<int[]>(jsonString);
-            int objectNumber = gallery[new Random().Next(0, gallery.Length)];
+            if (objectNumber == -1)
+            {
+                objectNumber = gallery[new Random().Next(0, gallery.Length)];
+            }
             return _config.GetValue<string>("URL:Metmuseum:ArtJson") + objectNumber;
+        }
+
+        private IList<string>? GetWayToGet(MetmuseumObject metmuseumObject)
+        {
+            string? way = metmuseumObject.CreditLine.Length == 0 ? null : metmuseumObject.CreditLine;
+            if (way is null)
+            {
+                return null;
+            }
+            return new List<string>() { way };
         }
     }
 }

@@ -6,8 +6,8 @@ namespace EverydayIsArtAPI.Services
     public class TretyakovService : ITretyakovService
     {
         private readonly IConfiguration _config;
-        private readonly ILogger<TretyakovService> _logger;
         private readonly IHTMLService _htmlService;
+        private readonly ILogger<TretyakovService> _logger;
 
         public TretyakovService(IHTMLService htmlService, IConfiguration config, ILogger<TretyakovService> logger)
         {
@@ -16,12 +16,28 @@ namespace EverydayIsArtAPI.Services
             _logger = logger;
         }
 
+        public async Task<Art?> GetArt(string url)
+        {
+            return await GetBaseArt(url);
+        }
+
         public async Task<Art?> GetArt()
+        {
+            string url = await GetSourceUrl();
+            return await GetBaseArt(url);
+        }
+
+        private IList<string>? GetAuthor(object htmlDocument)
+        {
+            string selector = _config.GetValue<string>("Selector:Tretyakov:ArtAuthor");
+            return GetPart(htmlDocument, selector);
+        }
+
+        private async Task<Art?> GetBaseArt(string url)
         {
             try
             {
-                string objectUrl = await GetSourceUrl();
-                object htmlDocument = await _htmlService.GetHTMLDocument(objectUrl);
+                object htmlDocument = await _htmlService.GetHTMLDocument(url);
 
                 Art art = new();
                 art.Description = GetDescription(htmlDocument);
@@ -36,7 +52,7 @@ namespace EverydayIsArtAPI.Services
 
                 art.WayToGet = GetWayToGet(htmlDocument);
                 art.ImageUrl = GetImageUrl(htmlDocument);
-                art.SourceUrl = objectUrl;
+                art.SourceUrl = url;
                 art.SourceUrlText = _config.GetValue<string>("SourceUrlText:Tretyakov");
 
                 return art;
@@ -46,18 +62,6 @@ namespace EverydayIsArtAPI.Services
                 _logger.LogError(ex, "An error occurred on Tretyakov art receiving.");
                 return null;
             }
-        }
-
-        private IList<string>? GetWayToGet(object htmlDocument)
-        {
-            string selector = _config.GetValue<string>("Selector:Tretyakov:ArtSource");
-            return GetPart(htmlDocument, selector);
-        }
-
-        private IList<string>? GetAuthor(object htmlDocument)
-        {
-            string selector = _config.GetValue<string>("Selector:Tretyakov:ArtAuthor");
-            return GetPart(htmlDocument, selector);
         }
 
         private string? GetDate(object htmlDocument)
@@ -128,6 +132,12 @@ namespace EverydayIsArtAPI.Services
         {
             string selector = _config.GetValue<string>("Selector:Tretyakov:ArtName");
             return _htmlService.NormalizeNodeInnerText(_htmlService.GetNodesInnerText(htmlDocument, selector)[0]);
+        }
+
+        private IList<string>? GetWayToGet(object htmlDocument)
+        {
+            string selector = _config.GetValue<string>("Selector:Tretyakov:ArtSource");
+            return GetPart(htmlDocument, selector);
         }
     }
 }

@@ -16,11 +16,25 @@ namespace EverydayIsArtAPI.Services
             _logger = logger;
         }
 
+        public async Task<Art?> GetArt(string url)
+        {
+            return await GetBaseArt(url);
+        }
+
         public async Task<Art?> GetArt()
+        {
+            return await GetBaseArt();
+        }
+
+        private async Task<Art?> GetBaseArt(string url = null)
         {
             try
             {
                 int index = new Random().Next(0, _services.Count);
+                if (url is not null)
+                {
+                    throw new NotImplementedException();
+                }
                 return await _services[index].GetArt();
             }
             catch (Exception ex)

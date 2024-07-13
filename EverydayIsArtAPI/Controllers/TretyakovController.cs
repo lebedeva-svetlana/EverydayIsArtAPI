@@ -7,7 +7,7 @@ namespace EverydayIsArtAPI.Controllers
     ///     A controller that provides access to the State Tretyakov Gallery exhibits.
     /// </summary>
     [ApiController]
-    [Route("random/[controller]")]
+    [Route("[controller]")]
     public class TretyakovController(ITretyakovService artService) : ArtController(artService)
     {
     }

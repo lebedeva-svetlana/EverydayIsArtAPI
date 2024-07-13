@@ -14,5 +14,16 @@ namespace EverydayIsArtAPI.Services
         ///     The random exhibit.
         /// </returns>
         public Task<Art?> GetArt();
+
+        /// <summary>
+        ///     Returns a exhibit from url.
+        /// </summary>
+        /// <param name="url">
+        ///     URL of the exhibit.
+        /// </param>
+        /// <returns>
+        ///     The exhibit.
+        /// </returns>
+        public Task<Art?> GetArt(string url);
     }
 }

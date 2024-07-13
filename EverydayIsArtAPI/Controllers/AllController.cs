@@ -7,7 +7,7 @@ namespace EverydayIsArtAPI.Controllers
     ///     A controller that provides access to exhibits of all used organizations.
     /// </summary>
     [ApiController]
-    [Route("random/[controller]")]
+    [Route("[controller]")]
     public class AllController(IAllService artService) : ArtController(artService)
     {
     }
