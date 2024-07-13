@@ -17,14 +17,9 @@ namespace EverydayIsArtAPI.Services
             _logger = logger;
         }
 
-        public async Task<Art?> GetArt(string url)
+        public async Task<Art?> GetArt(string objectNumber)
         {
-            string? objectNumber = GetObjectNumFromURL(url);
-            if (objectNumber is null)
-            {
-                return null;
-            }
-            url = await GetSourceUrl(objectNumber);
+            string url = await GetSourceUrl(objectNumber);
             return await GetBaseArt(url);
         }
 
@@ -196,11 +191,15 @@ namespace EverydayIsArtAPI.Services
             return dimesions;
         }
 
-        private string GetGalleryUrl()
+        private string GetGalleryUrl(string objectNumber = null)
         {
             string url = _config.GetValue<string>("URL:Vam:GalleryJson");
             int end = _config.GetValue<int>("ObjectsNumber:Vam:Gallery") + 1;
-            return url + new Random().Next(1, end);
+            if (objectNumber is null)
+            {
+                return url + new Random().Next(1, end);
+            }
+            return url + objectNumber;
         }
 
         private string? GetMedium(VamObject vamObject)
@@ -227,6 +226,7 @@ namespace EverydayIsArtAPI.Services
                 return null;
             }
         }
+
         private List<string>? GetPlaceOfOrigin(VamObject vamObject)
         {
             if (vamObject.Record.PlacesOfOrigin is null || vamObject.Record.PlacesOfOrigin.Length == 0)

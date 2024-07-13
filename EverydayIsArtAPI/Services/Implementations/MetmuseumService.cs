@@ -17,14 +17,9 @@ namespace EverydayIsArtAPI.Services
             _logger = logger;
         }
 
-        public async Task<Art?> GetArt(string url)
+        public async Task<Art?> GetArt(string objectNumber)
         {
-            int objectNumber = GetObjectNumFromURL(url);
-            if (objectNumber == -1)
-            {
-                return null;
-            }
-            url = await GetSourceUrl(objectNumber);
+            string url = await GetSourceUrl(objectNumber);
             return await GetBaseArt(url);
         }
 
@@ -123,24 +118,6 @@ namespace EverydayIsArtAPI.Services
             return metmuseumObject.Medium == "" ? null : $"Materials: {metmuseumObject.Medium}";
         }
 
-        private int GetObjectNumFromURL(string url)
-        {
-            try
-            {
-                int lastIndex = url.LastIndexOf('/');
-                if (lastIndex == url.Length - 1)
-                {
-                    url = url.Remove(lastIndex);
-                }
-                lastIndex = url.LastIndexOf('/') + 1;
-                return Convert.ToInt32(url[lastIndex..]);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred on GetObjectNumFromURL.");
-                return -1;
-            }
-        }
         private List<string>? GetPlaceOfOrigin(MetmuseumObject metmuseumObject)
         {
             if (metmuseumObject.GeographyType.Length == 0 && metmuseumObject.City.Length == 0 && metmuseumObject.State.Length == 0 && metmuseumObject.County.Length == 0 && metmuseumObject.County.Length == 0 && metmuseumObject.Culture.Length == 0)
@@ -181,13 +158,13 @@ namespace EverydayIsArtAPI.Services
             return placePart;
         }
 
-        private async Task<string> GetSourceUrl(int objectNumber = -1)
+        private async Task<string> GetSourceUrl(string objectNumber = null)
         {
             string jsonString = File.ReadAllText("Data/metmuseumIds.json");
             var gallery = JsonSerializer.Deserialize<int[]>(jsonString);
-            if (objectNumber == -1)
+            if (objectNumber is null)
             {
-                objectNumber = gallery[new Random().Next(0, gallery.Length)];
+                objectNumber = Convert.ToString(gallery[new Random().Next(0, gallery.Length)]);
             }
             return _config.GetValue<string>("URL:Metmuseum:ArtJson") + objectNumber;
         }

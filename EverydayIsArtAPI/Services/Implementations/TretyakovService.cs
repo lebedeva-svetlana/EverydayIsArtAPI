@@ -16,8 +16,9 @@ namespace EverydayIsArtAPI.Services
             _logger = logger;
         }
 
-        public async Task<Art?> GetArt(string url)
+        public async Task<Art?> GetArt(string objectNumber)
         {
+            string url = await GetSourceUrl(objectNumber);
             return await GetBaseArt(url);
         }
 
@@ -117,8 +118,13 @@ namespace EverydayIsArtAPI.Services
             return _htmlService.NormalizeNodesInnerText(_htmlService.GetNodesInnerText(htmlDocument, selector));
         }
 
-        private async Task<string> GetSourceUrl()
+        private async Task<string> GetSourceUrl(string objectNumber = null)
         {
+            if (objectNumber is not null)
+            {
+                return _config.GetValue<string>("URL:Tretyakov:Base") + "/app/masterpiece/" + objectNumber;
+            }
+
             int end = _config.GetValue<int>("ObjectsNumber:Tretyakov:Art") + 1;
             string selector = _config.GetValue<string>("Selector:Tretyakov:GalleryObject").Replace("{number}", new Random().Next(1, end).ToString());
 

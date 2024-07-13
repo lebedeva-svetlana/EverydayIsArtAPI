@@ -39,17 +39,17 @@ namespace EverydayIsArtAPI.Controllers
         ///     Gets an exhibit.
         /// </summary>
         /// <param name="url">
-        ///     URL of the exhibit.
+        ///     Number of the exhibit.
         /// </param>
         /// <returns>
         ///     A JSON that contains <see cref="Art"/> with 200 status code or 500 status code.
         /// </returns>
-        [HttpGet("url")]
+        [HttpGet("{objectNumber}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Art>> GetArt(string url)
+        public async Task<ActionResult<Art>> GetArt(string objectNumber)
         {
-            var art = await _artService.GetArt(url);
+            var art = await _artService.GetArt(objectNumber);
             if (art is null)
             {
                 return StatusCode(500, "Internal server error.");
