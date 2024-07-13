@@ -6,16 +6,16 @@ EverydayIsArtAPI provides access to museum exhibits.
 
 ### Random exhibit
 
-- `GET /random/all` returns exhibit from all organizations.
-- `GET /random/tretyakov` returns exhibit from the State Tretyakov Gallery.
-- `GET /random/vam` returns exhibit from Victoria and Albert Museum.
-- `GET /random/metmuseum` returns exhibit from the Metropolitan Museum of Art.
+- `GET /all` returns exhibit from all organizations.
+- `GET /tretyakov` returns exhibit from the State Tretyakov Gallery.
+- `GET /vam` returns exhibit from Victoria and Albert Museum.
+- `GET /metmuseum` returns exhibit from the Metropolitan Museum of Art.
 
 #### Example
 
 ##### Request
 
-`*/random/metmuseum`
+`*/metmuseum`
 
 ##### Response body
 
