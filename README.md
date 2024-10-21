@@ -1,4 +1,4 @@
-﻿# EverydayIsArtAPI
+﻿# EverydayIsArt API
  
 [![.NET Version](https://img.shields.io/badge/Version-.NET_Core_8.0-blue.svg)]([https://shields.io/](https://dotnet.microsoft.com/)) [![License](https://img.shields.io/badge/License-GPL_3.0-green.svg)]([https://shields.io/](https://github.com/lebedeva-svetlana/NameGeneratorLib/blob/main/LICENSE.md)) [![UI Language](https://img.shields.io/badge/UI_Language-EN-yellow.svg)]([https://shields.io/])
 
